@@ -28,7 +28,7 @@ namespace TinyCsvParser
                 throw new ArgumentNullException("csvData");
             }
 
-            var query = csvData
+            ParallelQuery<Row> query = csvData
                 .Skip(options.SkipHeader ? 1 : 0)
                 .AsParallel();
 

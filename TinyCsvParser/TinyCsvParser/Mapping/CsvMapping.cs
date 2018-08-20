@@ -30,8 +30,8 @@ namespace TinyCsvParser.Mapping
 
         protected CsvMapping()
             : this(new TypeConverterProvider())
-        {
-        }
+        { }
+        
 
         protected CsvMapping(ITypeConverterProvider typeConverterProvider)
         {
