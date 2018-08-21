@@ -18,6 +18,8 @@ namespace TinyCsvParser.Test.CsvParser
             public string FirstName { get; set; }
             public string LastName { get; set; }
             public DateTime BirthDate { get; set; }
+
+            public string tes;
         }
 
         private class CsvPersonMapping : CsvMapping<Person>
@@ -27,6 +29,7 @@ namespace TinyCsvParser.Test.CsvParser
                 MapProperty(0, x => x.FirstName);
                 MapProperty(1, x => x.LastName);
                 MapProperty(2, x => x.BirthDate);
+                MapProperty(3, x =>x.tes);
             }
         }
 

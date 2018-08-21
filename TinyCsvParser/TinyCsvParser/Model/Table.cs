@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TinyCsvParser.Tokenizer;
 
 namespace TinyCsvParser.Model
 {
 
-    public class Table
+    public class Table:ITable
     {
         public string Name;
         public string[][] Data;
@@ -28,9 +27,7 @@ namespace TinyCsvParser.Model
                 throw new ArgumentNullException("csvData");
             }
 
-            ParallelQuery<Row> query = csvData
-                .Skip(m_options.SkipHeader ? 1 : 0)
-                .AsParallel();
+            ParallelQuery<Row> query = csvData.Skip(m_options.SkipHeader ? 1 : 0).AsParallel();
 
             // If you want to get the same order as in the CSV file, this option needs to be set:
             if (m_options.KeepOrder)
@@ -53,31 +50,41 @@ namespace TinyCsvParser.Model
                 .Select(line => new TokenizedRow(line.Index, m_options.Tokenizer.Tokenize(line.Data)))
                 .Select(fields => Data[fields.Index] = fields.Tokens);
         }
-
-        public string[,] GetData(string sindex)
+        /// <summary>
+        /// ArraySegment<string> is row, [] is coloum
+        /// </summary>
+        /// <param name="sindex"></param>
+        /// <returns></returns>
+        public ArraySegment<string>[] GetData(string sindex)
         {
             int[] index = m_parseIndex.ParseIndex(sindex);
+            ArraySegment<string>[] res = null;
+            int w = index[2] - index[0] + 1;
+            int h = index[3] - index[1] + 1;
             if (index[2] >= 0)
             {
-                int w =index[2] - index[0] + 1;
-                int h = index[3] - index[1] + 1;
-                string[,] res = new string[w,h];
-                for (int i = index[0] , x = 0; i < w; i++,x++)
+                res = new ArraySegment<string>[h];
+                for (int i = 0; i < h; ++i)
                 {
-                    for (int j = index[1] , y = 0; j < h; j++, y++)
-                    {
-                        res[x,y] = Data[i][j];
-                    }
+                    res[i] = new ArraySegment<string>(Data[index[1] + i], index[0], w);
                 }
-                return res;
             }
             else
             {
-                string[,] res = new string[1,1];
-                res[0, 0] = Data[index[0]][index[1]];
-                return res;
+                res = new ArraySegment<string>[]{new ArraySegment<string>(Data[index[1]],index[0],w)};
             }
-           
+            return res;
+        }
+
+        public IEnumerable<string> ReadAll()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int LineNum { get; }
+        public IEnumerable<string> ReadLine(int index)
+        {
+            throw new NotImplementedException();
         }
     }
 

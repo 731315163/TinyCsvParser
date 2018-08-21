@@ -10,23 +10,12 @@ using TinyCsvParser.Model;
 
 namespace TinyCsvParser.Mapping
 {
-    public abstract class CsvMapping<TEntity>
+    public abstract partial class CsvMapping<TEntity>
         where TEntity : class, new()
     {
-        private class IndexToPropertyMapping
-        {
-            public int ColumnIndex { get; set; }
-
-            public ICsvPropertyMapping<TEntity> PropertyMapping { get; set; }
-
-            public override string ToString()
-            {
-                return string.Format("IndexToPropertyMapping (ColumnIndex = {0}, PropertyMapping = {1}", ColumnIndex, PropertyMapping);
-            }
-        }
 
         private readonly ITypeConverterProvider typeConverterProvider;
-        private readonly List<IndexToPropertyMapping> csvPropertyMappings;
+        private readonly List<IndexToPropertyMapping<TEntity>> csvPropertyMappings;
 
         protected CsvMapping()
             : this(new TypeConverterProvider())
@@ -36,7 +25,7 @@ namespace TinyCsvParser.Mapping
         protected CsvMapping(ITypeConverterProvider typeConverterProvider)
         {
             this.typeConverterProvider = typeConverterProvider;
-            this.csvPropertyMappings = new List<IndexToPropertyMapping>();
+            this.csvPropertyMappings = new List<IndexToPropertyMapping<TEntity>>();
         }
 
         protected CsvPropertyMapping<TEntity, TProperty> MapProperty<TProperty>(int columnIndex, Expression<Func<TEntity, TProperty>> property)
@@ -60,7 +49,7 @@ namespace TinyCsvParser.Mapping
 
         private void AddPropertyMapping<TProperty>(int columnIndex, CsvPropertyMapping<TEntity, TProperty> propertyMapping)
         {
-            var indexToPropertyMapping = new IndexToPropertyMapping
+            var indexToPropertyMapping = new IndexToPropertyMapping<TEntity>
             {
                 ColumnIndex = columnIndex,
                 PropertyMapping = propertyMapping
