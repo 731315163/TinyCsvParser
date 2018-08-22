@@ -10,43 +10,43 @@ namespace TinyCsvParser.Mapping
         where TEntity : class, new()
     {
         private readonly ITypeConverterProvider typeConverterProvider;
-        private readonly List<IndexToPropertyMapping<TEntity>> csvPropertyMappings;
+        
+        private readonly List<IndexToNestedPropertyMapping<TEntity>> csvPropertyMappings;
 
-        protected NestedCsvMapping()
-            : this(new TypeConverterProvider())
+        private readonly ISerializeProvider serializeProvider;
+
+        protected NestedCsvMapping(ISerializeProvider serializeProvider)
+            : this(new TypeConverterProvider(),serializeProvider)
         { }
 
-        protected NestedCsvMapping(ITypeConverterProvider provider)
+        protected NestedCsvMapping(ITypeConverterProvider provider,ISerializeProvider serializeProvider)
         {
             this.typeConverterProvider = provider;
+            this.serializeProvider = serializeProvider;
         }
-        protected CsvPropertyMapping<TEntity, TProperty> MapProperty<TProperty>(int columnIndex, Expression<Func<TEntity, TProperty>> property)
+  
+        protected ICsvPropertyNestedMapping<TEntity> MapProperty<TProperty>(int columnIndex, Action<TEntity,TProperty> setproperty, ISerialize<TProperty> serialize = null)
         {
-           // return MapProperty(columnIndex, property, typeConverterProvider.Resolve<TProperty>());
-            return null;
-        }
-        protected ICsvPropertyNestedMapping<TEntity> MapProperty<TProperty>(int columnIndex, Action<TEntity,ISerialize<TProperty>> del)
-        {
-            return new CsvPropertyNestedMapping<TProperty>();
+            return MapProperty<TProperty>(columnIndex,setproperty,typeConverterProvider.Resolve<TProperty>(),serialize??serializeProvider.Resolve<TProperty>());
         }
 
-        protected ICsvPropertyMapping<TEntity> MapProperty<TProperty>(int columnIndex, Expression<Func<TEntity, TProperty>> property, ITypeConverter<TProperty> typeConverter)
+        protected ICsvPropertyNestedMapping<TEntity> MapProperty<TProperty>(int columnIndex,Action<TEntity, TProperty> property, ITypeConverter<TProperty> typeConverter, ISerialize<TProperty> serialize)
         {
             if (csvPropertyMappings.Any(x => x.ColumnIndex == columnIndex))
             {
                 throw new InvalidOperationException(string.Format("Duplicate mapping for column index {0}", columnIndex));
             }
 
-            var propertyMapping = new CsvPropertyMapping<TEntity, TProperty>(property, typeConverter);
+            var propertyMapping = new CsvPropertyNestedMapping<TEntity, TProperty>(property, typeConverter,serialize);
 
             AddPropertyMapping(columnIndex, propertyMapping);
 
             return propertyMapping;
         }
-
-        private void AddPropertyMapping<TProperty>(int columnIndex, CsvPropertyMapping<TEntity, TProperty> propertyMapping)
+    
+        private void AddPropertyMapping<TProperty>(int columnIndex, CsvPropertyNestedMapping<TEntity, TProperty> propertyMapping)
         {
-            var indexToPropertyMapping = new IndexToPropertyMapping<TEntity>
+            var indexToPropertyMapping = new IndexToNestedPropertyMapping<TEntity>
             {
                 ColumnIndex = columnIndex,
                 PropertyMapping = propertyMapping

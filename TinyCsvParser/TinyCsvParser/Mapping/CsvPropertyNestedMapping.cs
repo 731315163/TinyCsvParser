@@ -15,9 +15,10 @@ namespace TinyCsvParser.Mapping
         private Action<TEntity,TProperty> propertySetter;
         private ISerialize<TProperty> serializer; 
 
-        public CsvPropertyNestedMapping(Func<TEntity, bool> del, ISerialize<TProperty> serialize)
+        public CsvPropertyNestedMapping(Action<TEntity, TProperty> propertySetter,ITypeConverter<TProperty> propertyConverter,ISerialize<TProperty> serialize)
         {
-
+            this.propertySetter = propertySetter;
+            this.propertyConverter = propertyConverter;
         }
         public bool TryMapValue(TEntity e, ITable t)
         {
@@ -25,9 +26,8 @@ namespace TinyCsvParser.Mapping
             if (serializer.TrySerialize(t, out p))
             {
                 propertySetter(e, p);
-                return true
+                return true;
             }
-
             return false;
         }
 

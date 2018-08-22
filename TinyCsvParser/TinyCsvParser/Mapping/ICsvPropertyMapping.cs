@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Philipp Wagner. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using TinyCsvParser.Model;
+
 namespace TinyCsvParser.Mapping
 {
     public interface ICsvPropertyMapping<TEntity>
@@ -11,6 +13,7 @@ namespace TinyCsvParser.Mapping
     public interface ICsvPropertyNestedMapping<TEntity>
         where TEntity : class, new()
     {
-        bool TryMapValue<V>(TEntity entity, V value);
+        bool TryMapValue(TEntity entity, ITable value);
+       
     }
 }
