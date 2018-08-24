@@ -6,7 +6,6 @@ namespace TinyCsvParser.Mapping
 {
 
     public class IndexToPropertyMapping<TEntity>
-        where TEntity : class, new()
     {
         public int ColumnIndex { get; set; }
 
@@ -17,16 +16,5 @@ namespace TinyCsvParser.Mapping
             return string.Format("IndexToPropertyMapping (ColumnIndex = {0}, PropertyMapping = {1}", ColumnIndex, PropertyMapping);
         }
     }
-    public class IndexToNestedPropertyMapping<TEntity>
-        where TEntity : class, new()
-    {
-        public int ColumnIndex { get; set; }
-
-        public ICsvPropertyNestedMapping<TEntity> PropertyMapping { get; set; }
-
-        public override string ToString()
-        {
-            return string.Format("IndexToPropertyMapping (ColumnIndex = {0}, PropertyMapping = {1}", ColumnIndex, PropertyMapping);
-        }
-    }
+    
 }

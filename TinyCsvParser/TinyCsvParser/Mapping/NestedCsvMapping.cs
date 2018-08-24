@@ -1,52 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
+using TinyCsvParser.Model;
 using TinyCsvParser.TypeConverter;
 
 namespace TinyCsvParser.Mapping
 {
     public class NestedCsvMapping<TEntity>
-        where TEntity : class, new()
     {
         private readonly ITypeConverterProvider typeConverterProvider;
         
-        private readonly List<IndexToNestedPropertyMapping<TEntity>> csvPropertyMappings;
+        private readonly List<IndexToPropertyMapping<TEntity>> csvPropertyMappings;
 
-        private readonly ISerializeProvider serializeProvider;
+        private Func<TEntity> newobject = () => { return Activator.CreateInstance<TEntity>(); };
 
-        protected NestedCsvMapping(ISerializeProvider serializeProvider)
-            : this(new TypeConverterProvider(),serializeProvider)
+        protected NestedCsvMapping()
+            : this(new TypeConverterProvider())
         { }
 
-        protected NestedCsvMapping(ITypeConverterProvider provider,ISerializeProvider serializeProvider)
+        protected NestedCsvMapping(ITypeConverterProvider provider)
         {
             this.typeConverterProvider = provider;
-            this.serializeProvider = serializeProvider;
         }
   
-        protected ICsvPropertyNestedMapping<TEntity> MapProperty<TProperty>(int columnIndex, Action<TEntity,TProperty> setproperty, ISerialize<TProperty> serialize = null)
+        protected ICsvPropertyMapping<TEntity> MapProperty<TProperty>(int columnIndex, Action<TEntity,TProperty> setproperty)
         {
-            return MapProperty<TProperty>(columnIndex,setproperty,typeConverterProvider.Resolve<TProperty>(),serialize??serializeProvider.Resolve<TProperty>());
+            return MapProperty<TProperty>(columnIndex,setproperty,typeConverterProvider.Resolve<TProperty>());
         }
 
-        protected ICsvPropertyNestedMapping<TEntity> MapProperty<TProperty>(int columnIndex,Action<TEntity, TProperty> property, ITypeConverter<TProperty> typeConverter, ISerialize<TProperty> serialize)
+        protected ICsvPropertyMapping<TEntity> MapProperty<TProperty>(int columnIndex,Action<TEntity, TProperty> property, ITypeConverter<TProperty> typeConverter)
         {
-            if (csvPropertyMappings.Any(x => x.ColumnIndex == columnIndex))
+            for (var i = 0; i < csvPropertyMappings.Count; i++)
             {
-                throw new InvalidOperationException(string.Format("Duplicate mapping for column index {0}", columnIndex));
+                var x = csvPropertyMappings[i];
+                if (x.ColumnIndex == columnIndex)
+                {
+                    throw new InvalidOperationException(string.Format("Duplicate mapping for column index {0}",
+                        columnIndex));
+                }
             }
 
-            var propertyMapping = new CsvPropertyNestedMapping<TEntity, TProperty>(property, typeConverter,serialize);
+            var propertyMapping = new CsvBaseTypePropertyMapping<TEntity, TProperty>(property, typeConverter);
 
             AddPropertyMapping(columnIndex, propertyMapping);
 
             return propertyMapping;
         }
-    
-        private void AddPropertyMapping<TProperty>(int columnIndex, CsvPropertyNestedMapping<TEntity, TProperty> propertyMapping)
+
+        protected ICsvPropertyMapping<TEntity> MapProperty(int columnIndex,Action<TEntity, ITable> property)
         {
-            var indexToPropertyMapping = new IndexToNestedPropertyMapping<TEntity>
+            Action<TEntity,string> propertySetter = (e,s) =>
+            {
+                //todo 获取数据
+
+            };
+            var propertyMapping = new CsvPropertyNestedMapping<TEntity>(propertySetter);
+
+            AddPropertyMapping(columnIndex, propertyMapping);
+
+            return propertyMapping;
+        }
+        private void AddPropertyMapping<TProperty>(int columnIndex, CsvBaseTypePropertyMapping<TEntity, TProperty> propertyMapping)
+        {
+            var indexToPropertyMapping = new IndexToPropertyMapping<TEntity>
             {
                 ColumnIndex = columnIndex,
                 PropertyMapping = propertyMapping
@@ -54,5 +70,62 @@ namespace TinyCsvParser.Mapping
 
             csvPropertyMappings.Add(indexToPropertyMapping);
         }
+        private void AddPropertyMapping(int columnIndex, CsvPropertyNestedMapping<TEntity> propertyMapping)
+        {
+            var indexToPropertyMapping = new IndexToPropertyMapping<TEntity>
+            {
+                ColumnIndex = columnIndex,
+                PropertyMapping = propertyMapping
+            };
+
+            csvPropertyMappings.Add(indexToPropertyMapping);
+        }
+
+        public CsvMappingResult<TEntity> Map(TokenizedRow values)
+        {
+            TEntity entity = newobject();
+
+            for (int pos = 0; pos < csvPropertyMappings.Count; pos++)
+            {
+                var indexToPropertyMapping = csvPropertyMappings[pos];
+
+                var columnIndex = indexToPropertyMapping.ColumnIndex;
+
+                if (columnIndex >= values.Tokens.Length)
+                {
+                    return new CsvMappingResult<TEntity>()
+                    {
+                        RowIndex = values.Index,
+                        Error = new CsvMappingError()
+                        {
+                            ColumnIndex = columnIndex,
+                            Value = string.Format("Column {0} is Out Of Range", columnIndex)
+                        }
+                    };
+                }
+
+                var value = values.Tokens[columnIndex];
+
+                if (!indexToPropertyMapping.PropertyMapping.TryMapValue(entity, value))
+                {
+                    return new CsvMappingResult<TEntity>()
+                    {
+                        RowIndex = values.Index,
+                        Error = new CsvMappingError
+                        {
+                            ColumnIndex = columnIndex,
+                            Value = string.Format("Column {0} with Value '{1}' cannot be converted", columnIndex, value)
+                        }
+                    };
+                }
+            }
+
+            return new CsvMappingResult<TEntity>()
+            {
+                RowIndex = values.Index,
+                Result = entity
+            };
+        }
+
     }
 }

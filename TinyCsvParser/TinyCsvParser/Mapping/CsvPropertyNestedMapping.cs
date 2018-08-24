@@ -1,34 +1,56 @@
 ﻿// Copyright (c) Philipp Wagner. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
 using System;
-using TinyCsvParser.Model;
 using TinyCsvParser.TypeConverter;
 
 namespace TinyCsvParser.Mapping
 {
-    public class CsvPropertyNestedMapping<TEntity, TProperty> : ICsvPropertyNestedMapping<TEntity>
-        where TEntity : class, new()
+    public class CsvPropertyNestedMapping<TEntity> : ICsvPropertyMapping<TEntity>
+    {
+        private string propertyName;
+        private Action<TEntity,string> propertySetter;
+
+        public CsvPropertyNestedMapping(Action<TEntity, string> propertySetter)
+        {
+            this.propertySetter = propertySetter;
+        }
+       
+
+        public override string ToString()
+        {
+            return string.Format("CsvPropertyMapping (PropertyName = {0}, Converter = {1})");
+        }
+
+        public bool TryMapValue(TEntity entity, string value)
+        {
+            propertySetter(entity, value);
+            return true;
+        }
+    }
+    public class CsvBaseTypePropertyMapping<TEntity,TProperty> : ICsvPropertyMapping<TEntity>
     {
         private string propertyName;
         private ITypeConverter<TProperty> propertyConverter;
-        private Action<TEntity,TProperty> propertySetter;
-        private ISerialize<TProperty> serializer; 
+        private Action<TEntity, TProperty> propertySetter;
 
-        public CsvPropertyNestedMapping(Action<TEntity, TProperty> propertySetter,ITypeConverter<TProperty> propertyConverter,ISerialize<TProperty> serialize)
+        public CsvBaseTypePropertyMapping(Action<TEntity, TProperty> property, ITypeConverter<TProperty> typeConverter)
         {
-            this.propertySetter = propertySetter;
-            this.propertyConverter = propertyConverter;
+            propertyConverter = typeConverter;
+          
         }
-        public bool TryMapValue(TEntity e, ITable t)
+
+        public bool TryMapValue(TEntity entity, string value)
         {
-            TProperty p;
-            if (serializer.TrySerialize(t, out p))
+            TProperty convertedValue;
+
+            if (!propertyConverter.TryConvert(value, out convertedValue))
             {
-                propertySetter(e, p);
-                return true;
+                return false;
             }
-            return false;
+
+            propertySetter(entity, convertedValue);
+
+            return true;
         }
 
         public override string ToString()

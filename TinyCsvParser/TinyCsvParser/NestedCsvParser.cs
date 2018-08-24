@@ -11,7 +11,7 @@ namespace TinyCsvParser
     {
         public ParallelQuery<CsvMappingResult<TEntity>> Parse(IEnumerable<Row> csvData)
         {
-           
+            return null;
         }
     }
 }

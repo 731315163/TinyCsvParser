@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace TinyCsvParser.Model
 {
@@ -8,16 +9,15 @@ namespace TinyCsvParser.Model
     public class Table:ITable
     {
         public string Name;
-        public string[][] Data;
+        public ArraySegment<string>[] Data;
         private readonly IParseIndex m_parseIndex;
         private readonly CsvParserOptions m_options;
 
-        public Table(IEnumerable<Row> data, CsvParserOptions options, string name = null, IParseIndex parse = null )
+        public Table(IEnumerable<Row> data, CsvParserOptions options, string name = null, IParseIndex parse = null)
         {
             Name = name;
             m_parseIndex = parse??DefaultParseIndex.Parse;
             m_options = options;
-
         }
 
         public void ParseData(IEnumerable<Row> csvData)
@@ -45,10 +45,10 @@ namespace TinyCsvParser.Model
                 query = query.Where(line => !line.Data.StartsWith(m_options.CommentCharacter));
             }
            
-            Data = new string[query.Count()][];
+            Data = new ArraySegment<string>[query.Count()];
             query
                 .Select(line => new TokenizedRow(line.Index, m_options.Tokenizer.Tokenize(line.Data)))
-                .Select(fields => Data[fields.Index] = fields.Tokens);
+                .Select(fields => Data[fields.Index] = new ArraySegment<string>(fields.Tokens));
         }
         /// <summary>
         /// ArraySegment<string> is row, [] is coloum
@@ -81,10 +81,18 @@ namespace TinyCsvParser.Model
             throw new NotImplementedException();
         }
 
-        public int LineNum { get; }
+        public int LineNum
+        {
+            get { return Data.Length; }
+        }
+
         public IEnumerable<string> ReadLine(int index)
         {
-            throw new NotImplementedException();
+            string[] line = Data[index];
+            for (var i = 0; i < line.Length; i++)
+            {
+                yield return line[i];
+            }
         }
     }
 
