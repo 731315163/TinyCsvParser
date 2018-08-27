@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TinyCsvParser.Load;
 using TinyCsvParser.Model;
 using TinyCsvParser.TypeConverter;
 
@@ -12,8 +13,11 @@ namespace TinyCsvParser.Mapping
         
         private readonly List<IndexToPropertyMapping<TEntity>> csvPropertyMappings;
 
-        private Func<TEntity> newobject = () => { return Activator.CreateInstance<TEntity>(); };
-
+        protected Func<TEntity> newobject = () => { return Activator.CreateInstance<TEntity>(); };
+        /// <summary>
+        /// 这个类的使用的table数据
+        /// </summary>
+        protected ITable table;
         protected NestedCsvMapping()
             : this(new TypeConverterProvider())
         { }
@@ -51,7 +55,7 @@ namespace TinyCsvParser.Mapping
         {
             Action<TEntity,string> propertySetter = (e,s) =>
             {
-                //todo 获取数据
+               //todo 取得表
 
             };
             var propertyMapping = new CsvPropertyNestedMapping<TEntity>(propertySetter);

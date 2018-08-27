@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TinyCsvParser.Model
+namespace TinyCsvParser.Load
 {
     public class  DefaultParseIndex:IParseIndex
     {

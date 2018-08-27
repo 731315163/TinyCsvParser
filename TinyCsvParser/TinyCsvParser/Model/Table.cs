@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
+using TinyCsvParser.Load;
 
 namespace TinyCsvParser.Model
 {
-
+    /// <summary>
+    /// 保存一个csv的字符串数据
+    /// </summary>
     public class Table:ITable
     {
         public string Name;
@@ -13,13 +15,17 @@ namespace TinyCsvParser.Model
         private readonly IParseIndex m_parseIndex;
         private readonly CsvParserOptions m_options;
 
-        public Table(IEnumerable<Row> data, CsvParserOptions options, string name = null, IParseIndex parse = null)
+        public Table(IEnumerable<Row> data, CsvParserOptions options, string name, IParseIndex parse = null)
         {
             Name = name;
             m_parseIndex = parse??DefaultParseIndex.Parse;
             m_options = options;
         }
 
+        public Table(ArraySegment<string>[] data)
+        {
+            this.Data = data;
+        }
         public void ParseData(IEnumerable<Row> csvData)
         {
             if (csvData == null)
@@ -50,6 +56,12 @@ namespace TinyCsvParser.Model
                 .Select(line => new TokenizedRow(line.Index, m_options.Tokenizer.Tokenize(line.Data)))
                 .Select(fields => Data[fields.Index] = new ArraySegment<string>(fields.Tokens));
         }
+
+        public ITable GetTable(string sindex)
+        {
+            var table = new Table(GetData(sindex));
+            return table;
+        }
         /// <summary>
         /// ArraySegment<string> is row, [] is coloum
         /// </summary>
@@ -66,12 +78,12 @@ namespace TinyCsvParser.Model
                 res = new ArraySegment<string>[h];
                 for (int i = 0; i < h; ++i)
                 {
-                    res[i] = new ArraySegment<string>(Data[index[1] + i], index[0], w);
+                    res[i] = new ArraySegment<string>(Data[index[1] + i].Array, index[0], w);
                 }
             }
             else
             {
-                res = new ArraySegment<string>[]{new ArraySegment<string>(Data[index[1]],index[0],w)};
+                res = new[]{new ArraySegment<string>(Data[index[1]].Array,index[0],w)};
             }
             return res;
         }
@@ -81,17 +93,18 @@ namespace TinyCsvParser.Model
             throw new NotImplementedException();
         }
 
-        public int LineNum
+        public int LineCount
         {
             get { return Data.Length; }
         }
 
         public IEnumerable<string> ReadLine(int index)
         {
-            string[] line = Data[index];
-            for (var i = 0; i < line.Length; i++)
+            var line = Data[index];
+            int count = line.Count + line.Offset;
+            for (var i = line.Offset; i < count; i++)
             {
-                yield return line[i];
+                yield return line.Array[i];
             }
         }
     }

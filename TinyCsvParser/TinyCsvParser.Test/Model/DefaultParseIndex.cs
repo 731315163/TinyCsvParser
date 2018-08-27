@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using NUnit.Framework;
-using TinyCsvParser.Model;
+﻿using NUnit.Framework;
+using TinyCsvParser.Load;
 
 namespace TinyCsvParser.Test.Model
 {
