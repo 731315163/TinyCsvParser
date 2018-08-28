@@ -18,7 +18,7 @@ namespace TinyCsvParser.Mapping
 
         public override string ToString()
         {
-            return string.Format("CsvPropertyMapping (PropertyName = {0}, Converter = {1})");
+            return string.Format("CsvPropertyMapping (PropertyName = {0})", propertyName);
         }
 
         public bool TryMapValue(TEntity entity, string value)

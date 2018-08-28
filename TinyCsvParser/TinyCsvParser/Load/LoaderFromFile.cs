@@ -13,7 +13,7 @@ namespace TinyCsvParser.Load
 
         public virtual string KeyToPath(string key)
         {
-            throw  new NotImplementedException();
+            return null;
         }
 
         public IEnumerable<Row> Load(string key)

@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace TinyCsvParser.Load
 {
-    public class  DefaultParseIndex:IParseIndex
+    public class  DefaultParseIndex:IParseAddress
     {
-        public static DefaultParseIndex Parse = new DefaultParseIndex();
-        public int[] ParseIndex(string index)
+       
+        public virtual int[] ParseIndex(string index)
         {
             var rect = new int[4];
             int i = 0;
@@ -69,6 +71,43 @@ namespace TinyCsvParser.Load
         {
             if ((a < 0 && b >=0) || (a >= 0 && b < 0))
                 throw new IndexOutOfRangeException();
+        }
+
+        public virtual string GetTableName(string address)
+        {
+            Match res = Regex.Match(address, @"^\[.+\]");
+            return CopyMathchRangeString(res, 1, res.Value.Length - 1);
+        }
+
+        public virtual string GetSheetName(string address)
+        {
+            Match res = Regex.Match(address, @"\].+!");
+            return CopyMathchRangeString(res, 1, res.Value.Length - 1);
+        }
+
+        public virtual string GetIndex(string address)
+        {
+            Match res = Regex.Match(address, "!?(([A-Z]+[0-9]+:?){1,2})");
+            if (res.Success)
+            {
+                if(res.Value[0] == '!')
+                    return CopyMathchRangeString(res, 1, res.Value.Length);
+                else
+                    return res.Value;
+            }
+            return String.Empty;
+        }
+
+        protected string CopyMathchRangeString(Match m, int offset, int count)
+        {
+            if ( ! m.Success)
+                return string.Empty;
+            StringBuilder sb = new StringBuilder();
+            for (var i = offset; i < count; i++)
+            {
+                sb.Append(m.Value[i]);
+            }
+            return sb.ToString();
         }
     }
 }

@@ -1,14 +1,16 @@
 ﻿
 using System.Collections.Generic;
+using System.ComponentModel;
 using TinyCsvParser.Load;
 
 namespace TinyCsvParser.Model
 {
     public class TableContext
     {
-        protected IDictionary<string, ITable> context = new Dictionary<string, ITable>();
-        protected ILoader loader;
-        public ITable GetTable(string tablename,string sheetname,string keyorrect)
+        protected   IDictionary<string, ITable> context = new Dictionary<string, ITable>();
+        protected  ILoader loader;
+        public static TableContext Instance;
+        public  ITable GetTable(string tablename,string sheetname,string keyorrect)
         {
             ITable res;
             if (context.TryGetValue(keyorrect, out res))
@@ -18,6 +20,12 @@ namespace TinyCsvParser.Model
             res = new Table(csvdata,null,"");
             context.Add(keyorrect,res);
             return res;
+        }
+
+        public ITable GetTable(string key, ITable table)
+        {
+            return null;
+            
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿
 namespace TinyCsvParser.Load
 {
-    public interface IParseIndex
+    public interface IParseAddress
     {
         /// <summary>
         /// 0 = xstart ,1 = ystart ,2 = xend,3 = yend,rect data
@@ -9,6 +9,11 @@ namespace TinyCsvParser.Load
         /// <param name="index"></param>
         /// <returns></returns>
         int[] ParseIndex(string index);
+
+        string GetTableName(string address);
+        string GetSheetName(string address);
+
+        string GetIndex(string address);
     }
 
   

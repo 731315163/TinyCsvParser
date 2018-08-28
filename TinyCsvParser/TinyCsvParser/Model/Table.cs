@@ -11,14 +11,20 @@ namespace TinyCsvParser.Model
     public class Table:ITable
     {
         public string Name;
+
+        public string Key
+        {
+            get { return Name; } set { Name = value; }
+        }
+
         public ArraySegment<string>[] Data;
-        private readonly IParseIndex m_parseIndex;
+        private readonly IParseAddress m_parseIndex;
         private readonly CsvParserOptions m_options;
 
-        public Table(IEnumerable<Row> data, CsvParserOptions options, string name, IParseIndex parse = null)
+        public Table(IEnumerable<Row> data, CsvParserOptions options, string name, IParseAddress parse = null)
         {
             Name = name;
-            m_parseIndex = parse??DefaultParseIndex.Parse;
+            m_parseIndex = parse??new DefaultParseIndex();
             m_options = options;
         }
 
@@ -88,7 +94,9 @@ namespace TinyCsvParser.Model
             return res;
         }
 
-        public IEnumerable<string> ReadAll()
+        
+
+        public IEnumerable<IEnumerable<string>> ReadAllLines()
         {
             throw new NotImplementedException();
         }

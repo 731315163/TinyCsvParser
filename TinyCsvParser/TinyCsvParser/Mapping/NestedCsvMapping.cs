@@ -13,6 +13,7 @@ namespace TinyCsvParser.Mapping
         
         private readonly List<IndexToPropertyMapping<TEntity>> csvPropertyMappings;
 
+        protected readonly IParseAddress parseAddress;
         protected Func<TEntity> newobject = () => { return Activator.CreateInstance<TEntity>(); };
         /// <summary>
         /// 这个类的使用的table数据
@@ -53,10 +54,10 @@ namespace TinyCsvParser.Mapping
 
         protected ICsvPropertyMapping<TEntity> MapProperty(int columnIndex,Action<TEntity, ITable> property)
         {
-            Action<TEntity,string> propertySetter = (e,s) =>
+            Action<TEntity,string> propertySetter = (e, s) =>
             {
-               //todo 取得表
-
+                var csvtable = TableContext.Instance.GetTable(s, this.table);
+                property(e, csvtable);
             };
             var propertyMapping = new CsvPropertyNestedMapping<TEntity>(propertySetter);
 
@@ -127,6 +128,16 @@ namespace TinyCsvParser.Mapping
             return new CsvMappingResult<TEntity>()
             {
                 RowIndex = values.Index,
+                Result = entity
+            };
+        }
+        public CsvMappingResult<TEntity> Map(ArraySegment<string> values)
+        {
+            TEntity entity = newobject();
+
+            return new CsvMappingResult<TEntity>()
+            {
+              
                 Result = entity
             };
         }
