@@ -10,20 +10,14 @@ namespace TinyCsvParser.Model
     /// </summary>
     public class Table:ITable
     {
-        public string Name;
-
-        public string Key
-        {
-            get { return Name; } set { Name = value; }
-        }
 
         public ArraySegment<string>[] Data;
         private readonly IParseAddress m_parseIndex;
         private readonly CsvParserOptions m_options;
 
-        public Table(IEnumerable<Row> data, CsvParserOptions options, string name, IParseAddress parse = null)
+        public Table(IEnumerable<Row> data, CsvParserOptions options, IParseAddress parse = null)
         {
-            Name = name;
+           
             m_parseIndex = parse??new DefaultParseIndex();
             m_options = options;
         }
@@ -63,11 +57,34 @@ namespace TinyCsvParser.Model
                 .Select(fields => Data[fields.Index] = new ArraySegment<string>(fields.Tokens));
         }
 
-        public ITable GetTable(string sindex)
+        public Tuple<string, string> Key { get; set; }
+
+        public IEnumerable<IEnumerable<string>> ReadAllLines()
+        {
+            throw new NotImplementedException();
+        }
+
+        public int LineCount
+        {
+            get { return Data.Length; }
+        }
+
+        public IEnumerable<string> ReadLine(int index)
+        {
+            var line = Data[index];
+            int count = line.Count + line.Offset;
+            for (var i = line.Offset; i < count; i++)
+            {
+                yield return line.Array[i];
+            }
+        }
+
+        public ITable CreateTable(string sindex)
         {
             var table = new Table(GetData(sindex));
             return table;
         }
+      
         /// <summary>
         /// ArraySegment<string> is row, [] is coloum
         /// </summary>
@@ -89,31 +106,9 @@ namespace TinyCsvParser.Model
             }
             else
             {
-                res = new[]{new ArraySegment<string>(Data[index[1]].Array,index[0],w)};
+                res = new[] { new ArraySegment<string>(Data[index[1]].Array, index[0], w) };
             }
             return res;
-        }
-
-        
-
-        public IEnumerable<IEnumerable<string>> ReadAllLines()
-        {
-            throw new NotImplementedException();
-        }
-
-        public int LineCount
-        {
-            get { return Data.Length; }
-        }
-
-        public IEnumerable<string> ReadLine(int index)
-        {
-            var line = Data[index];
-            int count = line.Count + line.Offset;
-            for (var i = line.Offset; i < count; i++)
-            {
-                yield return line.Array[i];
-            }
         }
     }
 

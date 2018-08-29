@@ -36,7 +36,7 @@ namespace TinyCsvParser.Mapping
         public CsvBaseTypePropertyMapping(Action<TEntity, TProperty> property, ITypeConverter<TProperty> typeConverter)
         {
             propertyConverter = typeConverter;
-          
+            
         }
 
         public bool TryMapValue(TEntity entity, string value)

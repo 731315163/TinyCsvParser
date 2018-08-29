@@ -11,12 +11,12 @@ namespace TinyCsvParser.Load
     {
         protected Encoding encoding;
 
-        public virtual string KeyToPath(string key)
+        public virtual string KeyToPath(Tuple<string, string> key)
         {
             return null;
         }
 
-        public IEnumerable<Row> Load(string key)
+        public IEnumerable<Row> Load(Tuple<string,string> key)
         {
             string fileName = KeyToPath(key);
             if (fileName == null)

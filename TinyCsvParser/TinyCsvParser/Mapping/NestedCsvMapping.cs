@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using TinyCsvParser.Load;
 using TinyCsvParser.Model;
 using TinyCsvParser.TypeConverter;
 
@@ -12,8 +10,6 @@ namespace TinyCsvParser.Mapping
         private readonly ITypeConverterProvider typeConverterProvider;
         
         private readonly List<IndexToPropertyMapping<TEntity>> csvPropertyMappings;
-
-        protected readonly IParseAddress parseAddress;
         protected Func<TEntity> newobject = () => { return Activator.CreateInstance<TEntity>(); };
         /// <summary>
         /// 这个类的使用的table数据
