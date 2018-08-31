@@ -8,14 +8,17 @@ namespace TinyCsvParser.Load
     public class LoaderFromString:ILoader
     {
         protected CsvReaderOptions csvReaderOptions;
-        public virtual string KeyToString(string key)
-        {
-            throw new NotImplementedException();
-        }
+        protected Func<Tuple<string, string>, string> getdata;
 
-        public IEnumerable<Row> Load(string key)
+        public LoaderFromString(Func<Tuple<string, string>, string> getdata, CsvParserOptions csvParserOptions)
         {
-            string csvData = KeyToString(key);
+            this.getdata = getdata;
+        }
+      
+
+        public IEnumerable<Row> Load(Tuple<string, string> key)
+        {
+            string csvData =getdata(key);
             return csvData
                 .Split(csvReaderOptions.NewLine, StringSplitOptions.None)
                 .Select((line, index) => new Row(index, line));

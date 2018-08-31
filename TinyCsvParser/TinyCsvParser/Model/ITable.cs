@@ -9,10 +9,10 @@ namespace TinyCsvParser.Model
         /// one is table name,  two is sheet name
         /// </summary>
         Tuple<string,string> Key { get; set; }
-        IEnumerable<IEnumerable<string>> ReadAllLines();
+        IEnumerable<IEnumerable<string>> ReadAllCell();
         int LineCount { get; }
         IEnumerable<string> ReadLine(int index);
 
-        ITable CreateTable(string index);
+        ITable CreateTable(int[] index);
     }
 }

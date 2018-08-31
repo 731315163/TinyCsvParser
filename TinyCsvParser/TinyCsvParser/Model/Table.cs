@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TinyCsvParser.Load;
 
 namespace TinyCsvParser.Model
 {
@@ -12,21 +11,21 @@ namespace TinyCsvParser.Model
     {
 
         public ArraySegment<string>[] Data;
-        private readonly IParseAddress m_parseIndex;
         private readonly CsvParserOptions m_options;
 
-        public Table(IEnumerable<Row> data, CsvParserOptions options, IParseAddress parse = null)
+        public Table(IEnumerable<Row> data, CsvParserOptions options,Tuple<string,string> key)
         {
-           
-            m_parseIndex = parse??new DefaultParseIndex();
             m_options = options;
+            Data = ParseData(data);
+            this.Key = key;
         }
 
-        public Table(ArraySegment<string>[] data)
+        public Table(ArraySegment<string>[] data,Tuple<string, string> key)
         {
+            this.Key = key;
             this.Data = data;
         }
-        public void ParseData(IEnumerable<Row> csvData)
+        public ArraySegment<string>[] ParseData(IEnumerable<Row> csvData)
         {
             if (csvData == null)
             {
@@ -51,19 +50,23 @@ namespace TinyCsvParser.Model
                 query = query.Where(line => !line.Data.StartsWith(m_options.CommentCharacter));
             }
            
-            Data = new ArraySegment<string>[query.Count()];
+            var data = new ArraySegment<string>[query.Count()];
             query
                 .Select(line => new TokenizedRow(line.Index, m_options.Tokenizer.Tokenize(line.Data)))
-                .Select(fields => Data[fields.Index] = new ArraySegment<string>(fields.Tokens));
+                .Select(fields => data[fields.Index] = new ArraySegment<string>(fields.Tokens));
+            return data;
         }
 
         public Tuple<string, string> Key { get; set; }
 
-        public IEnumerable<IEnumerable<string>> ReadAllLines()
+        public IEnumerable<IEnumerable<string>> ReadAllCell()
         {
-            throw new NotImplementedException();
+            for (int i = 0; i < Data.Length; ++i)
+            {
+                yield return ReadLine(i);
+            }
         }
-
+    
         public int LineCount
         {
             get { return Data.Length; }
@@ -79,9 +82,9 @@ namespace TinyCsvParser.Model
             }
         }
 
-        public ITable CreateTable(string sindex)
+        public ITable CreateTable(int[] index)
         {
-            var table = new Table(GetData(sindex));
+            var table = new Table(GetData(index),this.Key);
             return table;
         }
       
@@ -90,9 +93,8 @@ namespace TinyCsvParser.Model
         /// </summary>
         /// <param name="sindex"></param>
         /// <returns></returns>
-        public ArraySegment<string>[] GetData(string sindex)
+        public ArraySegment<string>[] GetData(int[] index)
         {
-            int[] index = m_parseIndex.ParseIndex(sindex);
             ArraySegment<string>[] res = null;
             int w = index[2] - index[0] + 1;
             int h = index[3] - index[1] + 1;

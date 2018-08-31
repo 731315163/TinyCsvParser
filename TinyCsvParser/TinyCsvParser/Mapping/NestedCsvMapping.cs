@@ -24,7 +24,7 @@ namespace TinyCsvParser.Mapping
             this.typeConverterProvider = provider;
         }
   
-        protected ICsvPropertyMapping<TEntity> MapProperty<TProperty>(int columnIndex, Action<TEntity,TProperty> setproperty)
+        public ICsvPropertyMapping<TEntity> MapProperty<TProperty>(int columnIndex, Action<TEntity,TProperty> setproperty)
         {
             return MapProperty<TProperty>(columnIndex,setproperty,typeConverterProvider.Resolve<TProperty>());
         }
@@ -48,7 +48,7 @@ namespace TinyCsvParser.Mapping
             return propertyMapping;
         }
 
-        protected ICsvPropertyMapping<TEntity> MapProperty(int columnIndex,Action<TEntity, ITable> property)
+        public ICsvPropertyMapping<TEntity> MapProperty(int columnIndex,Action<TEntity, ITable> property)
         {
             Action<TEntity,string> propertySetter = (e, s) =>
             {
@@ -130,10 +130,16 @@ namespace TinyCsvParser.Mapping
         public CsvMappingResult<TEntity> Map(ArraySegment<string> values)
         {
             TEntity entity = newobject();
-
+            CsvMappingError error = null;
+            for (int i = 0; i < csvPropertyMappings.Count; ++i)
+            {
+                if (!csvPropertyMappings[i].PropertyMapping.TryMapValue(entity, values.Array[values.Offset + i]))
+                {
+                }
+            }
+            
             return new CsvMappingResult<TEntity>()
             {
-              
                 Result = entity
             };
         }
