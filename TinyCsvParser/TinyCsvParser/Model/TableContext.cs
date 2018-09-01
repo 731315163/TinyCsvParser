@@ -4,7 +4,7 @@ using TinyCsvParser.Load;
 
 namespace TinyCsvParser.Model
 {
-    public class TableContext
+    public class TableContext:ITableContext
     {
         protected   IDictionary<Tuple<string,string>, ITable> context = new Dictionary<Tuple<string, string>, ITable>();
         protected IParseAddress parseAddress;
@@ -20,15 +20,20 @@ namespace TinyCsvParser.Model
             tablename = string.IsNullOrEmpty(tablename) ? table.Key.Item1 : tablename;
             sheetname = string.IsNullOrEmpty(sheetname) ? table.Key.Item2 : sheetname;
             Tuple<string, string> tablekey = new Tuple<string, string>( tablename, sheetname);
-            ITable rettable;
-            if( ! context.TryGetValue(tablekey,out rettable))
-            {
-                rettable = AddTable(tablekey, loader.Load(tablekey));
-            }
-
+            ITable rettable = GetTable(tablekey);
             if (string.IsNullOrEmpty(dataindex))
                 return rettable;
             return rettable.CreateTable(parseAddress.ParseIndex(dataindex));
+        }
+
+        public ITable GetTable(Tuple<string, string> tablekey)
+        {
+            ITable rettable;
+            if (!context.TryGetValue(tablekey, out rettable))
+            {
+                rettable = AddTable(tablekey, loader.Load(tablekey));
+            }
+            return rettable;
         }
 
         public ITable AddTable(Tuple<string, string> key, IEnumerable<Row> rows)

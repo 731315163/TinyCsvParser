@@ -9,8 +9,6 @@ namespace TinyCsvParser.Model
     /// </summary>
     public class Table:ITable
     {
-
-        public ArraySegment<string>[] Data;
         private readonly CsvParserOptions m_options;
 
         public Table(IEnumerable<Row> data, CsvParserOptions options,Tuple<string,string> key)
@@ -58,6 +56,7 @@ namespace TinyCsvParser.Model
         }
 
         public Tuple<string, string> Key { get; set; }
+        public ArraySegment<string>[] Data { get; set; }
 
         public IEnumerable<IEnumerable<string>> ReadAllCell()
         {

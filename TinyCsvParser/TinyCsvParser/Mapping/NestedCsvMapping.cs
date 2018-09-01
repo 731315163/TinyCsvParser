@@ -8,13 +8,14 @@ namespace TinyCsvParser.Mapping
     public class NestedCsvMapping<TEntity>
     {
         private readonly ITypeConverterProvider typeConverterProvider;
-        
         private readonly List<IndexToPropertyMapping<TEntity>> csvPropertyMappings;
         protected Func<TEntity> newobject = () => { return Activator.CreateInstance<TEntity>(); };
         /// <summary>
         /// 这个类的使用的table数据
         /// </summary>
         protected ITable table;
+        protected ITableContext tableContext;
+      
         protected NestedCsvMapping()
             : this(new TypeConverterProvider())
         { }
@@ -52,7 +53,7 @@ namespace TinyCsvParser.Mapping
         {
             Action<TEntity,string> propertySetter = (e, s) =>
             {
-                var csvtable = TableContext.Instance.GetTable(s, this.table);
+                var csvtable = tableContext.GetTable(s, this.table);
                 property(e, csvtable);
             };
             var propertyMapping = new CsvPropertyNestedMapping<TEntity>(propertySetter);
@@ -130,7 +131,6 @@ namespace TinyCsvParser.Mapping
         public CsvMappingResult<TEntity> Map(ArraySegment<string> values)
         {
             TEntity entity = newobject();
-            CsvMappingError error = null;
             for (int i = 0; i < csvPropertyMappings.Count; ++i)
             {
                 if (!csvPropertyMappings[i].PropertyMapping.TryMapValue(entity, values.Array[values.Offset + i]))
