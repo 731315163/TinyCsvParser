@@ -97,7 +97,15 @@
 <li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Changelog</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id2">2.0</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">2.5.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">2.5.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">2.4.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">2.3.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">2.2.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">2.2.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">2.1.1</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">2.1.0</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id10">2.0.0</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#breaking-changes">Breaking Changes</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#features">Features</a></li>
 </ul>
@@ -170,11 +178,63 @@
   <div class="section" id="changelog">
 <span id="id1"></span><h1>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="id2">
-<h2>2.0<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<h2>2.5.1<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Introduced Bugfixes to Ranges to allow compilation for .NET Core 3.0.</li>
+</ul>
+</div>
+<div class="section" id="id3">
+<h2>2.5.0<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added a range-based <code class="code docutils literal"><span class="pre">MapProperty</span></code> overload, that allows mapping to arrays.</li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h2>2.4.0<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added an <code class="code docutils literal"><span class="pre">ICsvMapping</span></code> interface to allow replacing the <code class="code docutils literal"><span class="pre">CsvMapping</span></code> implementation.</li>
+<li>Removed <code class="code docutils literal"><span class="pre">new()</span></code> constraints for mappings.</li>
+<li>Added a <code class="code docutils literal"><span class="pre">CsvStringArrayMapping</span></code> to map data into a String array.</li>
+<li>Uses <code class="code docutils literal"><span class="pre">PackageLicenseExpression</span></code> for NuGet Licensing.</li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h2>2.3.0<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Extension method <code class="code docutils literal"><span class="pre">ReadLinesFromStream</span></code> has been added to read data from Streams directly.</li>
+</ul>
+</div>
+<div class="section" id="id6">
+<h2>2.2.1<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Introduced .netstandard 2.0 support.</li>
+</ul>
+</div>
+<div class="section" id="id7">
+<h2>2.2.0<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Added an Option <code class="code docutils literal"><span class="pre">UnmappedRow</span></code> to the Parser, so Errors have access to the original data.</li>
+</ul>
+</div>
+<div class="section" id="id8">
+<h2>2.1.1<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Add a Option to trim values to the <code class="code docutils literal"><span class="pre">FixedLengthTokenizer</span></code></li>
+</ul>
+</div>
+<div class="section" id="id9">
+<h2>2.1.0<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Fix <code class="code docutils literal"><span class="pre">RFC4180Tokenizer</span></code> when using Tabs as Delimiter</li>
+<li>Added an Option to trim values to the <code class="code docutils literal"><span class="pre">StringSplitTokenizer</span></code></li>
+</ul>
+</div>
+<div class="section" id="id10">
+<h2>2.0.0<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="breaking-changes">
 <h3>Breaking Changes<a class="headerlink" href="#breaking-changes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Removed the <code class="code docutils literal"><span class="pre">WithCustomConverter</span></code> method from the <code class="docutils literal"><span class="pre">CsvPropertyMapping</span></code></li>
+<li>Removed the <code class="code docutils literal"><span class="pre">WithCustomConverter</span></code> method from the <code class="code docutils literal"><span class="pre">CsvPropertyMapping</span></code></li>
 <li>Changed the constructors of <code class="code docutils literal"><span class="pre">CsvParserOptions</span></code><ul>
 <li>The parameter <code class="code docutils literal"><span class="pre">fieldsSeparator</span></code> (column separator) is now a <code class="code docutils literal"><span class="pre">char</span></code> (was <code class="code docutils literal"><span class="pre">char[]</span></code>)</li>
 </ul>

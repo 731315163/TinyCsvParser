@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Philipp Wagner. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using NUnit.Framework;
 using System;
+using NUnit.Framework;
 using TinyCsvParser.Mapping;
 using TinyCsvParser.Model;
 
-namespace TinyCsvParser.Test.Issues
+namespace TinyCsvParser.Test.Mapping
 {
 
     [TestFixture]
@@ -15,6 +15,7 @@ namespace TinyCsvParser.Test.Issues
         private class SampleEntity
         {
             public int PropertyInt { get; set; }
+			public int GetOnlyPropertyInt { get; }
         }
 
         private class DuplicateMapping : CsvMapping<SampleEntity>
@@ -36,7 +37,7 @@ namespace TinyCsvParser.Test.Issues
         {
             public WrongColumnMapping()
             {
-                MapProperty(1, x => x.PropertyInt);
+                MapProperty(2, x => x.PropertyInt);
             }
         }
 
@@ -45,9 +46,11 @@ namespace TinyCsvParser.Test.Issues
         {
             var mapping = new WrongColumnMapping();
 
-            var result = mapping.Map(new TokenizedRow(1, new []{"1"}));
+            var result = mapping.Map(new TokenizedRow(1, new[] { "A", "1" }));
 
             Assert.IsFalse(result.IsValid);
+            Assert.IsNotNull(result.Error);
+            Assert.AreEqual("A|1", result.Error.UnmappedRow);
         }
 
         private class CorrectColumnMapping : CsvMapping<SampleEntity>
@@ -70,6 +73,7 @@ namespace TinyCsvParser.Test.Issues
 
             Assert.AreEqual("Column 0 with Value '' cannot be converted", result.Error.Value);
             Assert.AreEqual(0, result.Error.ColumnIndex);
+            Assert.AreEqual(string.Empty, result.Error.UnmappedRow);
 
             Assert.DoesNotThrow(() => result.ToString());
         }
@@ -86,5 +90,19 @@ namespace TinyCsvParser.Test.Issues
 
             Assert.DoesNotThrow(() => result.ToString());
         }
-    }
+
+		private class GetOnlyIntColumnMapping : CsvMapping<SampleEntity>
+		{
+			public GetOnlyIntColumnMapping()
+			{
+				MapProperty(0, x => x.GetOnlyPropertyInt);
+			}
+		}
+
+		[Test]
+		public void MapEntity_GetOnlyError_Test()
+		{
+			Assert.Throws<InvalidOperationException>(() => new GetOnlyIntColumnMapping());
+		}
+	}
 }

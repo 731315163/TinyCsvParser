@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+<<<<<<< HEAD
+    <TargetFrameworks>net45;</TargetFrameworks>
+=======
+    <TargetFrameworks>net452;netcoreapp2.0;netcoreapp3.0</TargetFrameworks>
+>>>>>>> 0f3b14301995e0e1cb5ba011bc0b2227ab69df3c
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.11.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TinyCsvParser\TinyCsvParser.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -29,28 +29,34 @@ namespace TinyCsvParser.Tokenizer
 
             public override string ToString()
             {
-                return string.Format("ColumnDefinition (Start = {0}, End = {1}", Start, End);
+                return $"ColumnDefinition (Start = {Start}, End = {End}";
             }
         }
 
         public readonly ColumnDefinition[] Columns;
 
-        public FixedLengthTokenizer(ColumnDefinition[] columns)
+        public readonly bool Trim;
+
+        public FixedLengthTokenizer(ColumnDefinition[] columns, bool trim = false)
         {
             if (columns == null)
             {
-                throw new ArgumentNullException("columns");
+                throw new ArgumentNullException(nameof(columns));
             }
+
             Columns = columns;
+            Trim = trim;
         }
 
-        public FixedLengthTokenizer(IList<ColumnDefinition> columns)
+        public FixedLengthTokenizer(IList<ColumnDefinition> columns, bool trim = false)
         {
             if (columns == null)
             {
-                throw new ArgumentNullException("columns");
+                throw new ArgumentNullException(nameof(columns));
             }
+
             Columns = columns.ToArray();
+            Trim = trim;
         }
 
         public string[] Tokenize(string input)
@@ -62,7 +68,7 @@ namespace TinyCsvParser.Tokenizer
                 var columnDefinition = Columns[columnIndex];
                 var columnData = input.Substring(columnDefinition.Start, columnDefinition.End - columnDefinition.Start);
 
-                tokenizedLine[columnIndex] = columnData;
+                tokenizedLine[columnIndex] = Trim ? columnData.Trim() : columnData;
             }
 
             return tokenizedLine;
@@ -72,7 +78,7 @@ namespace TinyCsvParser.Tokenizer
         {
             var columnDefinitionsString = string.Join(", ", Columns.Select(x => x.ToString()));
 
-            return string.Format("FixedLengthTokenizer (Columns = [{0}])", columnDefinitionsString);
+            return $"FixedLengthTokenizer (Columns = [{columnDefinitionsString}], Trim = {Trim})";
         }
     }
 }

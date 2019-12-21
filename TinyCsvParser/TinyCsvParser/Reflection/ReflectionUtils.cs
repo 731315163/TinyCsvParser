@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -13,9 +14,12 @@ namespace TinyCsvParser.Reflection
         {
             var member = GetMemberExpression(expression).Member;
             var property = member as PropertyInfo;
+
             if (property == null)
             {
-                throw new InvalidOperationException(string.Format("Member with Name '{0}' is not a property.", member.Name));
+                string message = $"Member with Name '{member.Name}' is not a property.";
+
+                throw new InvalidOperationException(message);
             }
             return property;
         }
@@ -35,7 +39,7 @@ namespace TinyCsvParser.Reflection
 
             if (memberExpression == null)
             {
-                throw new ArgumentException("Not a member access", "expression");
+                throw new ArgumentException("Not a member access", nameof(expression));
             }
 
             return memberExpression;
@@ -59,14 +63,17 @@ namespace TinyCsvParser.Reflection
             ParameterExpression parameter = Expression.Parameter(typeof(TProperty), "param");
 
 #if NETSTANDARD1_3
-            return Expression.Lambda<Action<TEntity, TProperty>>(
-                Expression.Call(instance, propertyInfo.SetMethod, parameter),
-                new ParameterExpression[] { instance, parameter }).Compile();
+			var setMethod = propertyInfo.SetMethod;
 #else
-            return Expression.Lambda<Action<TEntity, TProperty>>(
-                Expression.Call(instance, propertyInfo.GetSetMethod(), parameter),
-                new ParameterExpression[] { instance, parameter }).Compile();
+			var setMethod = propertyInfo.GetSetMethod();
 #endif
+			if (setMethod == null)
+			{
+				throw new InvalidOperationException($"Unable to map to property '{property.Body}' because it does not contain a setter.");
+			}
+			return Expression.Lambda<Action<TEntity, TProperty>>(
+                Expression.Call(instance, setMethod, parameter),
+                new ParameterExpression[] { instance, parameter }).Compile();
         }
 
         public static string GetPropertyNameFromExpression<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> expression)
