@@ -1,20 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
+using TinyCsvParser.Ranges;
 
 namespace TinyCsvParser.Model
 {
     public interface ITable
     {
-        /// <summary>
-        /// one is table name,  two is sheet name
-        /// </summary>
-        Tuple<string,string> Key { get; set; }
-        ArraySegment<string>[] Data { get; set; }
+        
+        string TableName { get; set; }
+        string SheetName { get; set; }
+        TableRect Rect { get; set; }
+     
+        TokenizedRow [] Data { get; set; }
+        ITable GetTable(TableRect index);
+        ArraySegment<string>[] GetRectData();
+        string GetCellData(TableRect rect);
 
-        IEnumerable<IEnumerable<string>> ReadAllCell();
-        int LineCount { get; }
-        IEnumerable<string> ReadLine(int index);
-
-        ITable CreateTable(int[] index);
+        ArraySegment<string> GetRowData(TableRect rect);
+        ArraySegment<string>[] GetRectData(TableRect rect);
+       
+        
     }
+     
 }

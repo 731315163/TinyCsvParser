@@ -13,6 +13,7 @@ namespace TinyCsvParser
     {
         private readonly CsvParserOptions options;
         private readonly ICsvMapping<TEntity> mapping;
+     
 
         public CsvParser(CsvParserOptions options, ICsvMapping<TEntity> mapping)
         {

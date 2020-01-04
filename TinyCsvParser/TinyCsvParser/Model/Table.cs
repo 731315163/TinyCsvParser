@@ -1,29 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using TinyCsvParser.Ranges;
 
 namespace TinyCsvParser.Model
 {
     /// <summary>
     /// 保存一个csv的字符串数据
     /// </summary>
-    public class Table:ITable
+    public class Table : ITable
     {
         private readonly CsvParserOptions m_options;
+        public string TableName { get; set; }
+        public string SheetName { get; set; }
+        public TableRect Rect { get; set; }
+      
+        public TokenizedRow[] Data { get; set; }
 
-        public Table(IEnumerable<Row> data, CsvParserOptions options,Tuple<string,string> key)
+        public Table(IEnumerable<Row> data, CsvParserOptions options, string TableName, string SheetName, TableRect rect = new TableRect())
         {
             m_options = options;
             Data = ParseData(data);
-            this.Key = key;
+            this.TableName = TableName;
+            this.SheetName = SheetName;
+            this.Rect = rect;
         }
 
-        public Table(ArraySegment<string>[] data,Tuple<string, string> key)
+        public Table(TokenizedRow[] data, string TableName, string SheetName, TableRect rect = new TableRect())
         {
-            this.Key = key;
             this.Data = data;
+            this.TableName = TableName;
+            this.SheetName = SheetName;
+            this.Rect = rect;
         }
-        public ArraySegment<string>[] ParseData(IEnumerable<Row> csvData)
+       
+        public TokenizedRow[] ParseData(IEnumerable<Row> csvData)
         {
             if (csvData == null)
             {
@@ -47,70 +59,69 @@ namespace TinyCsvParser.Model
             {
                 query = query.Where(line => !line.Data.StartsWith(m_options.CommentCharacter));
             }
-           
-            var data = new ArraySegment<string>[query.Count()];
-            query
-                .Select(line => new TokenizedRow(line.Index, m_options.Tokenizer.Tokenize(line.Data)))
-                .Select(fields => data[fields.Index] = new ArraySegment<string>(fields.Tokens));
-            return data;
+
+            return
+             query
+                 .Select(line => new TokenizedRow(line.Index, m_options.Tokenizer.Tokenize(line.Data)))
+                 .ToArray();
+
         }
 
-        public Tuple<string, string> Key { get; set; }
-        public ArraySegment<string>[] Data { get; set; }
 
-        public IEnumerable<IEnumerable<string>> ReadAllCell()
+        public ITable GetTable(TableRect index)
         {
-            for (int i = 0; i < Data.Length; ++i)
+            return new Table(this.Data, this.TableName, this.SheetName, index);
+        }
+        public ArraySegment<string>[] GetRectData()
+        {
+            if (Rect.Area == 0)
             {
-                yield return ReadLine(i);
+              var res = new ArraySegment<string>[Data.Length];
+                for (int i = 0; i < Data.Length; ++i)
+                {
+                    res[i] = new ArraySegment<string>(Data[i].Tokens, 0, Data[i].Tokens.Length);
+                }
+                return res;
             }
+            return GetRectData(Rect);
         }
-    
-        public int LineCount
-        {
-            get { return Data.Length; }
-        }
-
-        public IEnumerable<string> ReadLine(int index)
-        {
-            var line = Data[index];
-            int count = line.Count + line.Offset;
-            for (var i = line.Offset; i < count; i++)
-            {
-                yield return line.Array[i];
-            }
-        }
-
-        public ITable CreateTable(int[] index)
-        {
-            var table = new Table(GetData(index),this.Key);
-            return table;
-        }
-      
         /// <summary>
         /// ArraySegment<string> is row, [] is coloum
         /// </summary>
         /// <param name="sindex"></param>
         /// <returns></returns>
-        public ArraySegment<string>[] GetData(int[] index)
+        ///   public ArraySegment<string>[] GetRectData()
+        public ArraySegment<string>[] GetRectData(TableRect index)
         {
             ArraySegment<string>[] res = null;
-            int w = index[2] - index[0] + 1;
-            int h = index[3] - index[1] + 1;
-            if (index[2] >= 0)
+            if (index.heigh >= 0)
             {
-                res = new ArraySegment<string>[h];
-                for (int i = 0; i < h; ++i)
+                res = new ArraySegment<string>[index.heigh];
+                for (int i = 0; i < index.heigh; ++i)
                 {
-                    res[i] = new ArraySegment<string>(Data[index[1] + i].Array, index[0], w);
+                    res[i] = new ArraySegment<string>(Data[index.y + i].Tokens, index.x, index.width);
                 }
             }
             else
             {
-                res = new[] { new ArraySegment<string>(Data[index[1]].Array, index[0], w) };
+                res = new[] { new ArraySegment<string>(Data[index.y].Tokens, index.x, index.width) };
             }
             return res;
         }
+
+        public string GetCellData(TableRect rect)
+        {
+            return 
+                Data[rect.y].Tokens[rect.x];
+        }
+
+        public ArraySegment<string> GetRowData(TableRect rect)
+        {
+            return new ArraySegment<string>(Data[rect.y].Tokens,rect.x,rect.width);
+        }
     }
+ 
+
+
 
 }

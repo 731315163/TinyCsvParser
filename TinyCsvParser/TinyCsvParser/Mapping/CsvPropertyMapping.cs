@@ -21,7 +21,7 @@ namespace TinyCsvParser.Mapping
             propertyName = ReflectionUtils.GetPropertyNameFromExpression(property);
             propertySetter = ReflectionUtils.CreateSetter<TEntity, TProperty>(property);
         }
-
+        
         public bool TryMapValue(TEntity entity, string value) 
         {
             if (!propertyConverter.TryConvert(value, out var convertedValue))
