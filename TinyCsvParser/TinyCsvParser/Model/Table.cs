@@ -11,17 +11,15 @@ namespace TinyCsvParser.Model
     /// </summary>
     public class Table : ITable
     {
-        private readonly CsvParserOptions m_options;
+       
         public string TableName { get; set; }
         public string SheetName { get; set; }
         public TableRect Rect { get; set; }
       
         public TokenizedRow[] Data { get; set; }
 
-        public Table(IEnumerable<Row> data, CsvParserOptions options, string TableName, string SheetName, TableRect rect = new TableRect())
+        public Table( string TableName, string SheetName, TableRect rect = new TableRect())
         {
-            m_options = options;
-            Data = ParseData(data);
             this.TableName = TableName;
             this.SheetName = SheetName;
             this.Rect = rect;
@@ -34,39 +32,6 @@ namespace TinyCsvParser.Model
             this.SheetName = SheetName;
             this.Rect = rect;
         }
-       
-        public TokenizedRow[] ParseData(IEnumerable<Row> csvData)
-        {
-            if (csvData == null)
-            {
-                throw new ArgumentNullException("csvData");
-            }
-
-            ParallelQuery<Row> query = csvData.Skip(m_options.SkipHeader ? 1 : 0).AsParallel();
-
-            // If you want to get the same order as in the CSV file, this option needs to be set:
-            if (m_options.KeepOrder)
-            {
-                query = query.AsOrdered();
-            }
-
-            query = query
-                .WithDegreeOfParallelism(m_options.DegreeOfParallelism)
-                .Where(row => !string.IsNullOrWhiteSpace(row.Data));
-
-            // Ignore Lines, that start with a comment character:
-            if (!string.IsNullOrWhiteSpace(m_options.CommentCharacter))
-            {
-                query = query.Where(line => !line.Data.StartsWith(m_options.CommentCharacter));
-            }
-
-            return
-             query
-                 .Select(line => new TokenizedRow(line.Index, m_options.Tokenizer.Tokenize(line.Data)))
-                 .ToArray();
-
-        }
-
 
         public ITable GetTable(TableRect index)
         {
